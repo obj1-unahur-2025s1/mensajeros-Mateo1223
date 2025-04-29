@@ -1,11 +1,7 @@
 object paquete {
   var estaPago = false
   var destino = null
-  var mensajero = null
 
-  method definirMensajero(unMensajero) {
-    mensajero = unMensajero
-  }
 
   method definirDestino(unDestino) {
     destino = unDestino
@@ -14,7 +10,8 @@ object paquete {
   method pagarPaquete() {
     estaPago = true
   }
-  method puedeEntregarse() = destino.dejaPasar(mensajero) and self.estaPago()
+  method precio() = 50
+  method puedeEntregarse(unMensajero) = destino.dejaPasar(unMensajero) and self.estaPago()
   method estaPago() = estaPago
 }
 
@@ -74,4 +71,79 @@ object camion {
   }
 
   method peso() = acoplados * 500
+}
+
+
+object empresaMensajeria {
+  const mensajeros = []
+  const paquetesPendientes = []
+  const paquetesEnviados = []
+
+  method contratar(unMensajero) {
+    mensajeros.add(unMensajero)
+  }
+
+  method despedir(unMensajero) {
+    mensajeros.remove(unMensajero)
+  }
+
+  method enviar(unPaquete) {
+    if (self.puedeEntregarsePorAlguno(unPaquete)){
+      paquetesEnviados.add(unPaquete)
+    }
+    else{
+      paquetesPendientes.add(unPaquete)
+    }
+  }
+
+  method enviarPaquetes(listaDePaquetes) {
+    listaDePaquetes.forEach({p => self.enviar(p)})
+  }
+
+  method enviarPendienteMasCaro() {
+    if (self.puedeEntregarsePorAlguno(self.paquetePendienteMasCaro())){
+      self.enviar(self.paquetePendienteMasCaro())
+      paquetesPendientes.remove(self.paquetePendienteMasCaro())
+    }
+  }
+
+  method mensajeros() = mensajeros
+  method esGrande() = mensajeros.size() > 2
+  method puedeEntregarsePaquete() = paquete.puedeEntregarse(mensajeros.first())
+  method pesoUltimoMensajero() = mensajeros.last().peso()
+
+  method paquetePendienteMasCaro() = paquetesPendientes.max({p => p.precio()}) 
+  method puedeEntregarsePorAlguno(unPaquete) = mensajeros.any({m => unPaquete.puedeEntregarse(m)})
+  method losQuePuedenEntregar(unPaquete) = mensajeros.filter({m => unPaquete.puedeEntregarse(m)})
+  method pesosDeLosMensajeros() = mensajeros.sum({m => m.peso()})
+  method tieneSobrepeso() = (self.pesosDeLosMensajeros() / mensajeros.size()) > 500
+  method facturacion() = paquetesEnviados.sum({p => p.precio()})
+
+
+  
+}
+
+object paquetito {
+  method puedeEntregarse(unMensajero) = true
+  method estaPago() = true
+  method precio() = 0
+}
+
+object paqueton {
+  const destinos = []
+  var importePagado = 0
+
+
+  method agregarDestino(unDestino) {
+    destinos.add(unDestino)
+  }
+  
+  method pagar(unImporte) {
+    importePagado += unImporte
+  }
+
+  method precio() = 100 * destinos.size()
+  method estaPago() = importePagado >= self.precio()
+  method puedePasarPorDestinos(unMensajero) = destinos.all({d => d.dejaPasar(unMensajero)})
+  method puedeEntregarse(unMensajero) = self.estaPago() and self.puedePasarPorDestinos(unMensajero)
 }

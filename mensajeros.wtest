@@ -1,5 +1,57 @@
-describe "parte 1" {
-  test "description" {
+import mensajeros.*
+describe "test parte 1" {
+  test "roberto (90kg) puede llevar un paquete que está pago en un camión que tiene un acoplado." {
+    paquete.pagarPaquete()
+    roberto.cambiarTransporte(camion)
+    paquete.definirDestino(puendeDeBrooklyn)
+
+    assert.that(paquete.puedeEntregarse(roberto))
+  }
+
+  test "neo con crédito no puede llevar un paquete que no está pago a la matrix." {
+    paquete.definirDestino(laMatrix)
+    assert.notThat(paquete.puedeEntregarse(neo))
+  }
+}
+
+
+
+describe "test parte 2" {
+  method initialize(){
+    empresaMensajeria.contratar(neo)
+  }
     
+  test "neo esta contratado" {
+    empresaMensajeria.contratar(neo)
+    assert.that(empresaMensajeria.mensajeros().contains(neo))
+  }
+
+  test "neo fue despedido y no esta contratado" {
+    empresaMensajeria.despedir(neo)
+    assert.notThat(empresaMensajeria.mensajeros().contains(neo))
+  }
+
+  test "solo con neo la mensajeria no es grande" {
+    empresaMensajeria.contratar(neo)
+    assert.notThat(empresaMensajeria.esGrande())
+  }
+
+  test "si agrego a chuck y roberto, ahora es grande" {
+    empresaMensajeria.contratar(neo)
+    empresaMensajeria.contratar(chuckNorris)
+    empresaMensajeria.contratar(roberto)
+    assert.that(empresaMensajeria.esGrande())
+  }
+
+  test "el primer mensajero (neo) puede entregar el paquete" {
+    paquete.pagarPaquete()
+    paquete.definirDestino(laMatrix)
+
+    assert.that(empresaMensajeria.puedeEntregarsePaquete())
+  }
+
+  test "el peso de roberto es 95" {
+    empresaMensajeria.contratar(roberto)
+    assert.equals(95, empresaMensajeria.pesoUltimoMensajero())
   }
 }
